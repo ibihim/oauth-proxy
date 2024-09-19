@@ -190,15 +190,20 @@ func TestOAuthProxyE2E(t *testing.T) {
 	// Get the image from a pod that we know uses oauth-proxy to wrap
 	// its endpoints with OpenShift auth
 	// TODO: is there a better way?
-	alertmanagerPod, err := kubeClient.CoreV1().Pods("openshift-monitoring").Get(testCtx, "alertmanager-main-0", metav1.GetOptions{})
-	require.NoError(t, err)
-	var image string
-	for _, c := range alertmanagerPod.Spec.Containers {
-		if c.Name == "alertmanager-proxy" {
-			image = c.Image
-		}
+	//alertmanagerPod, err := kubeClient.CoreV1().Pods("openshift-monitoring").Get(testCtx, "alertmanager-main-0", metav1.GetOptions{})
+	//require.NoError(t, err)
+	registry := strings.Split(os.Getenv("RELEASE_IMAGE_LATEST"), "/")[0]
+	image := registry + "/" + os.Getenv("NAMESPACE") + "/pipeline:oauth-proxy"
+	if image != "" {
+		t.Fatalf(image)
 	}
-	require.NotEmpty(t, image)
+
+	// for _, c := range alertmanagerPod.Spec.Containers {
+	// 	if c.Name == "alertmanager-proxy" {
+	// 		image = c.Image
+	// 	}
+	// }
+	//require.NotEmpty(t, image)
 
 	// get rid of kubeadmin user to remove the additional step of choosing an idp
 	err = kubeClient.CoreV1().Secrets("kube-system").Delete(context.TODO(), "kubeadmin", metav1.DeleteOptions{})
